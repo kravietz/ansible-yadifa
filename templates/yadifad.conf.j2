@@ -93,7 +93,7 @@
 
         # If YADIFA has the controller enabled, allow control only for these
         # clients (none by default)
-        allow-control               {% yadifa_global_allow_control %}
+        allow-control               {{ yadifa_global_allow_control }}
 </main>
 
 <nsid>
@@ -200,9 +200,9 @@
 
 {% for key in yadifa_keys %}
 <key>
-  name {% key.name %}
-  algorithm {% key.algorithm %}
-  secret {% key.secret %}
+  name {{ key.name }}
+  algorithm {{ key.algorithm }}
+  secret {{ key.secret }}
 </key>
 {% endfor %}
 
@@ -215,7 +215,7 @@
 
 <acl>
 {% for acl in yadifa_acls %}
-  {% acl.name %} {% acl.value %}
+  {{ acl.name }} {{ acl.value }}
 {% endif %}
 </acl>
 
