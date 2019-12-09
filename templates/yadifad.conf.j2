@@ -7,7 +7,7 @@
         {% if ansible_service_mgr == "systemd" %}
         daemon                      off
         {% elif yadifa_daemon is defined %}
-        daemon                      {{ if yadifa_daemon }}on{% else %}off{% endif %}
+        daemon                      {% if yadifa_daemon %}on{% else %}off{% endif %}
         {% else %}
         daemon                      off
         {% endif %}
@@ -63,7 +63,7 @@
         log-from-start              on
 
         # Enable the collection and logging of statistics
-        statistics                  {{ if yadifa_statistics }}on{% else %}off{% endif %}
+        statistics                  {% if yadifa_statistics %}on{% else %}off{% endif %}
 
         # Choose the query log format (0 for none, 1 for YADIFA, 2 for BIND compatible, 3 for YADIFA and BIND)
         queries-log-type            1

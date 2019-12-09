@@ -1,7 +1,6 @@
 ---
 yadifa_hostname: "{{ ansible_hostname }}"
 yadifa_nsid: "{{ ansible_hostname }}"
-# yadifa_controller_secret: "LYHjUHOIAvHXnHa3kUPf7w=="
 yadifa_log_queries: no
 yadifa_daemon: no
 yadifa_statistics: yes
@@ -65,6 +64,7 @@ yadifa_global_allow_notify: none
 
 # yadifa_nsec3_salt: BA5EBA11
 
-yadifa_cli_server: "::1"
-yadifa_cli_algo: hmac-md5
-yadifa_cli_secret: LYHjUHOIAvHXnHa3kUPf7w==
+# These must match `yadifa_keys` entry used in `yadifa_acls` for controller
+# yadifa_cli_server: "::1"
+# yadifa_cli_algo: hmac-md5
+# yadifa_cli_secret: LYHjUHOIAvHXnHa3kUPf7w==
