@@ -1,0 +1,455 @@
+#
+# {{ ansible_managed }}
+#
+
+<main>
+        # Detach from the console
+        {% if ansible_service_mgr == "systemd" %}
+        daemon                      off
+        {% elif yadifa_daemon is defined %}
+        daemon                      {{ if yadifa_daemon }}on{% else %}off{% endif %}
+        {% else %}
+        daemon                      off
+        {% endif %}
+
+        # Jail the application
+        chroot                      off
+
+        # The path where all the log files will be written
+        logpath                     "/var/log/yadifa"
+
+        # The location of the pid file
+        pidfile                     "/run/yadifa/yadifad.pid"
+
+        # The path where all zone files will be written
+        datapath                    "/var/lib/yadifa"
+
+        # The path where the DNSSEC keys are found
+        keyspath                    "/var/lib/yadifa/keys"
+
+        # The path where the transfer and journaling files will be written (AXFR & IXFR)
+        xfrpath                     "/var/lib/yadifa/xfr"
+
+        # A string returned by a query of hostname. CH TXT (note if you leave
+        # this out, the real hostname will be given back)
+        hostname                  "{{ yadifa_hostname }}"
+
+        # An ID returned by a query to id.server. CH TXT
+        # serverid                   "yadifad-01"
+
+        # The version returned by a query to version.yadifa. CH TXT
+        # version                   "2.2.0"
+
+        # Set the maximum UDP packet size. Cannot be less than 512. Cannot be
+        # more than 65535.  Typical choice is 4096.
+        edns0-max-size              4096
+
+        # The maximum number of parallel TCP queries.
+        max-tcp-queries             100
+
+        # The user id to use (an integer can be used)
+        uid                         yadifa
+
+        # The group id to use (an integer can be used)
+        gid                         yadifa
+
+        # The DNS port.  Any DNS query will be made using that port unless a specific value is used.
+        port                        53
+
+        # The interfaces to listen to.
+        listen                      {% for i in yadifa_listen %}{{ i }}{% if not loop.last %}; {% endif %}{% endfor %}
+
+        # This will go into syslogd status
+        log-from-start              on
+
+        # Enable the collection and logging of statistics
+        statistics                  {{ if yadifa_statistics }}on{% else %}off{% endif %}
+
+        # Choose the query log format (0 for none, 1 for YADIFA, 2 for BIND compatible, 3 for YADIFA and BIND)
+        queries-log-type            1
+
+        # Drop queries with erroneous content
+        answer-formerr-packets      on
+
+        # Maximum number of records in an AXFR packet.  Set to 1 for compatibility
+        # with very old name servers
+        # axfr-maxrecordbypacket    0
+
+        # Global Access Control List rules.
+        #
+        # Rules can be defined on network ranges, TSIG signatures, and ACL rules
+
+        # simple queries:
+        allow-query                 {{ yadifa_global_allow_query }}
+
+        # dynamic update of a zone
+        allow-update                {{ yadifa_global_allow_update }}
+
+        # transfer of a zone (AXFR or IXFR)
+        allow-transfer              {{ yadifa_global_allow_transfer }}
+
+        # notify of a change in the master
+        allow-notify                {{ yadifa_global_allow_notify }}
+
+        # If YADIFA has the controller enabled, allow control only for these
+        # clients (none by default)
+        allow-control               {% yadifa_global_allow_control %}
+</main>
+
+<nsid>
+        ascii "{{ yadifa_nsid }}"
+</nsid>
+
+{% if yadifa_global_allow_control != "none" %}
+<control>
+        enabled true
+</control>
+{% endif %}
+
+# If YADIFA has been compiled with the Response Rate Limiter (default)
+
+<rrl>
+        # enable the RRL
+        enabled true
+
+        # don't actually limit the response rate, only log what the filter would do
+        log_only false
+
+        # how many responses per second are allowed for a (masked with the prefix) client
+        responses_per_second 5
+
+        # how many errors per second are allowed for a (masked with the prefix) client
+        errors_per_second 5
+
+        # window of time in which the rates are measured, expressed in seconds
+        window 15
+
+        # every "slip" dropped answers, a truncated answer may randomly be given so the client can ask again using TCP
+        slip 2
+
+        # the minimum size of the table storing (masked with the prefix) clients
+        min_table_size 1024
+
+        # the maximum size of the table storing (masked with the prefix) clients
+        max_table_size 16384
+
+        # IPv4 clients are masked with this prefix
+        ipv4_prefix_length 24
+
+        # IPv6 clients are masked with this prefix
+        ipv6_prefix_length 56
+
+        # the list of IP/networks (Access Control List) not impacted by the RRL
+        exempted none
+</rrl>
+
+#
+# Logging output channels configurations
+#
+# name  stream-name arguments
+#
+# name          is arbitrary
+# stream-name   defines the output type (ie: a file name or syslog)
+# arguments     is specific to the output type (ie: unix file access rights or syslog options and facilities
+
+<channels>
+#       name        stream-name     arguments
+        database    database.log    0644
+        dnssec      dnssec.log      0644
+        server      server.log      0644
+        statistics  statistics.log  0644
+        system      system.log      0644
+        zone        zone.log        0644
+        queries     queries.log     0644
+        all         all.log         0644
+
+        syslog      syslog          USER,CRON,PID
+
+        # although possible, these two do not do make much sense if daemon is enabled
+
+        stderr      STDERR
+        stdout      STDOUT
+</channels>
+
+# Logging input configurations
+#
+# name debug-level channels
+#
+# name          is predefined
+# debuglevel    uses the same names as syslog or * or all to filter the input
+# channels      is a comma-separated list of channels
+
+# In production, use EMERG,ALERT,CRIT,ERR,WARNING,NOTICE,INFO instead of *
+
+<loggers>
+#       bundle          debuglevel                          channels
+        database        EMERG,ALERT,CRIT,ERR,WARNING,NOTICE database,all
+        dnssec          EMERG,ALERT,CRIT,ERR,WARNING,NOTICE dnssec,all
+        server          EMERG,ALERT,CRIT,ERR,WARNING,NOTICE server,all
+        stats           *                                   statistics
+        system          EMERG,ALERT,CRIT,ERR,WARNING,NOTICE system,all
+        zone            EMERG,ALERT,CRIT,ERR,WARNING,NOTICE zone,all
+{% if yadifa_log_queries %}
+        queries         *                                   queries
+{% endif %}
+</loggers>
+
+#
+# TSIG Key configuration for controller access
+#
+
+{% for key in yadifa_keys %}
+<key>
+  name {% key.name %}
+  algorithm {% key.algorithm %}
+  secret {% key.secret %}
+</key>
+{% endfor %}
+
+#
+# Access Control List definitions
+#
+# Meant to be used in access lists parameters (allow-*)
+# arbitrary-name comma-separated-list
+#
+
+<acl>
+{% for acl in yadifa_acls %}
+  {% acl.name %} {% acl.value %}
+{% endif %}
+</acl>
+
+#
+# Master domain zone config
+#
+{% for z in yadifa_zones %}
+<zone>
+        type                    {{ z.type }}
+        domain                  {{ z.domain }}
+        file                    {{ z.file }}
+        allow-transfer          {% if z.allow_transfer is defined %}{{ z.allow_transfer }}{% else %}none{% endif %}
+        allow-update            {% if z.allow_update is defined %}{{ z.allow_transfer }}{% else %}none{% endif %}
+        allow-update-forwarding {% if z.allow_update_fw is defined %}{{ z.allow_transfer }}{% else %}none{% endif %}
+        {% if z.dnssec_policy is defined %}
+	      dnssec-policy		        "{{ z.dnssec_policy }}"
+        {% endif %}
+</zone>
+{% endfor %}
+
+#
+# Policies
+#
+
+{% for policy in yadifa_dnssec_policies %}
+<dnssec-policy>
+    id                      "{{ policy.id }}"
+    description             "{{ policy.description }}"
+    denial                  "{{ policy.denial }}"
+    {% for key_suite in policy.key_suites %}
+    key-suite               "{{ key_suite }}"
+    {% endfor %}
+</dnssec-policy>
+{% endfor %}
+
+<key-suite>
+    # name of the key-suite
+    id                      "zsk-1024"
+    key-template            "zsk-rsa-sha256-1024"
+    # optional, without it, the keys found in the storage are used
+    key-roll                "monthly-diary"
+</key-suite>
+
+<key-suite>
+    # name of the key-suite
+    id                      "ksk-2048"
+    key-template            "ksk-rsa-sha256-2048"
+    # optional, without it, the keys found in the storage are used
+    key-roll                "yearly-diary"
+</key-suite>
+
+######################################################
+
+<key-template>
+    id                  "zsk-rsa-sha512-1024"
+    algorithm           RSASHA512
+    size                1024
+</key-template>
+
+<key-template>
+    id                  "zsk-rsa-sha512-2048"
+    algorithm           RSASHA512
+    size                2048
+</key-template>
+
+<key-template>
+    id                  "zsk-rsa-sha256-1024"
+    algorithm           RSASHA256
+    size                1024
+</key-template>
+
+<key-template>
+    id                  "zsk-rsa-sha256-2048"
+    algorithm           RSASHA256
+    size                2048
+</key-template>
+
+<key-template>
+    id                  "ksk-rsa-sha512-1024"
+    ksk                 1
+    algorithm           RSASHA512
+    size                1024
+</key-template>
+
+<key-template>
+    id                  "ksk-rsa-sha512-2048"
+    ksk                 1
+    algorithm           RSASHA512
+    size                2048
+</key-template>
+
+<key-template>
+    id                  "ksk-rsa-sha256-1024"
+    ksk                 1
+    algorithm           RSASHA256
+    size                1024
+</key-template>
+
+<key-template>
+    id                  "ksk-rsa-sha256-2048"
+    ksk                 1
+    algorithm           RSASHA256
+    size                2048
+</key-template>
+
+######################################################
+
+<denial>
+    type NSEC3
+    id            "nsec3-random"
+    salt-length   32
+    iterations    10
+    # can be 0 or 1, true or false, and on or off
+    optout        off
+</denial>
+
+{% if yadifa_nsec3_salt is defined %}
+<denial>
+    type NSEC3
+    id            "nsec3-fixed"
+    salt          "{{ nsec3_salt }}"      # if nsec3-resalting is off
+    iterations    5           # the number of additional times the hash function has been performe
+    # can be 0 or 1, true or false, and on or off
+    optout        off
+</denial>
+{% endif %}
+
+######################################################
+
+
+
+    #               minutes     hours       days               months         weekdays         weeks
+
+<key-roll>
+    id                 "yearly-diary"
+
+    generate            5          0           15                  6            *                 * # this year   (2016) 15/06 at 00:05
+    publish             10         0           15                  6            *                 * #                             00:10
+    activate            15         0           16                  6            *                 * #                    16/06 at 00:15
+    inactive            15         0           17                  6            *                 * #             (2017) 17/06 at 00:15
+    remove              15        11           18                  6            *                 * #             (2017) 18/06 at 11:15
+</key-roll>
+
+
+<key-roll>
+    id                 "monthly-diary"
+
+    generate            5          0           *                   *            tue               0 # 1 tuesday   of the month at 00:05
+    publish             10         0           *                   *            tue               0 #                             00:10
+    activate            15         0           *                   *            wed               0 # 1 wednesday of the month at 00:15
+    inactive            15         0           *                   *            thu               0 # 1 thursday  of the month at 00:15
+    remove              15        11           *                   *            fri               0 # 1 friday    of the month at 11:15
+</key-roll>
+
+<key-roll>
+    id                 "weekly-diary"
+
+    generate            25         0           *                   *            sun               * # every sunday of the month at 00:25
+    publish             30         0           *                   *            sun               * #                           at 00:30
+    activate            35         0           *                   *            sun               * #                           at 00:35
+    inactive            35         0           *                   *            sun               * #                           at 00:35
+    remove              35        11           *                   *            sun               * #                           at 11:35
+</key-roll>
+
+<key-roll>
+    id                 "daily-diary"
+
+    generate            5          0           *                   *            *               *   # at 00:05
+    publish             10         0           *                   *            *               *   # at 00:10
+    activate            15         0           *                   *            *               *   # at 00:15
+    inactive            15         0           *                   *            *               *   # at 00:15
+    remove              15        11           *                   *            *               *   # at 11:15
+</key-roll>
+
+<key-roll>
+    id                 "hourly-diary"
+
+    generate            1          *           *                   *            *                 *
+    publish             5          *           *                   *            *                 *
+    activate            10         *           *                   *            *                 *
+    inactive            15         *           *                   *            *                 *
+    remove              20         *           *                   *            *                 *
+</key-roll>
+
+<key-roll>
+    id                 "half-hourly-diary"
+
+    generate            0,30       *           *                   *            *                 *
+    publish             1,31       *           *                   *            *                 *
+    activate            2,32       *           *                   *            *                 *
+    inactive            34,04      *           *                   *            *                 *
+    remove              38,08      *           *                   *            *                 *
+</key-roll>
+
+<key-roll>
+    id                  "insane-diary"
+
+    generate   * * * * * *
+    publish    * * * * * *
+    activate   * * * * * *
+    inactive   * * * * * *
+    remove     * * * * * *
+</key-roll>
+
+<key-roll>
+    id                  "monthly-relative"
+
+    generate            +31d
+    publish             +60
+    activate            +120
+    inactive            +33d # must be bigger than generate, to avoid a gap
+    remove              +1d
+</key-roll>
+
+<key-roll>
+    id                  "insane-relative"
+
+    generate            +60
+    publish             +0
+    activate            +0
+    inactive            +60
+    remove              +0
+</key-roll>
+
+<key-roll>
+    id                  "less-insane-relative"
+
+    generate            +120
+    publish             +0
+    activate            +0
+    inactive            +160
+    remove              +0
+</key-roll>
+
+
+
+######################################################

@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+{% if yadifa_global_allow_control != "none" %}
+<yadifa>
+	server {{ yadifa_cli_server }}
+	tsig-key-name "controller-key"
+</yadifa>
+<key>
+	name "controller-key"
+	algorithm "{{ yadifa_cli_algo }}"
+	secret "{{ yadifa_cli_secret }}"
+</key>
+{% endif %}

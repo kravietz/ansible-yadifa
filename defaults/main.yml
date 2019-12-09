@@ -1,0 +1,70 @@
+---
+yadifa_hostname: "{{ ansible_hostname }}"
+yadifa_nsid: "{{ ansible_hostname }}"
+# yadifa_controller_secret: "LYHjUHOIAvHXnHa3kUPf7w=="
+yadifa_log_queries: no
+yadifa_daemon: no
+yadifa_statistics: yes
+
+yadifa_data_dir: /var/lib/yadifa
+yadifa_masters_dir: "{{ yadifa_data_dir }}/masters"
+
+yadifa_listen:
+- "0.0.0.0"
+- "::"
+
+yadifa_zones:
+# these come with Yadifa installation by default
+- type: master
+  domain: localhost
+  file: masters/localhost.zone
+- type: master
+  domain: localhost6
+  file: masters/localhost6.zone
+- type: master
+  domain: 0.0.127.in-addr.arpa
+  file: masters/0.0.127.in-addr.arpa.zone
+- type: master
+  domain: 0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa
+  file: masters/0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa.zone
+# - type: master
+#   domain: webcookies.eu
+#   file: dns/master/webcookies.eu.zone
+#   allow_transfer: secondaries_acl
+#   allow_update: none
+#   allow_update_fw: none
+#   dnssec_policy: normal-policy
+
+yadifa_dnssec_policies:
+- id: normal-policy
+  description: Example of a policy with ZSK and KSK
+  denial: nsec3-random
+  key_suites:
+  - zsk-1024
+  - ksk-2048
+
+yadifa_keys: []
+# - name: controller-key
+#   algorithm: hmac-md5
+#   secret: SECRET
+
+yadifa_acls: []
+# - name: controller
+#   value: key controller-key
+# - name: cloudns
+#   value: "2a00:1768:1001:9::31:1, 2605:fe80:2100:a013:7::1, 2a0b:1640:1:1:1:1:8ec:5a47, 2a06:fb00:1::1:66, 2a06:fb00:1::2:66, 2a06:fb00:1::3:66, 2a06:fb00:1::4:66, 2a0b:1640:1:3::1, 2001:41d0:305:2100::32b4"
+
+# names of the ACLs to allow specific features from
+# these *must* match the ACL names defined in `yadifa_acls`
+# or be one of `none` or `any`
+yadifa_global_allow_control: none
+yadifa_global_allow_query: any
+yadifa_global_allow_update: none
+yadifa_global_allow_transfer: none
+yadifa_global_allow_notify: none
+
+# yadifa_nsec3_salt: BA5EBA11
+
+yadifa_cli_server: "::1"
+yadifa_cli_algo: hmac-md5
+yadifa_cli_secret: LYHjUHOIAvHXnHa3kUPf7w==

@@ -1,0 +1,27 @@
+---
+- name: yadifa package installed
+  apt:
+    name: yadifa
+
+- name: yadifad server configuration
+  template:
+    dest: /etc/yadifa/yadifad.conf
+    src: templates/yadifad.conf.j2
+
+- name: yadifa client configuration
+  template:
+    dest: /etc/yadifa.conf
+    src: templates/yadifa.conf.j2
+  when: yadifa_global_allow_control != "none"
+
+- name: zone files
+  copy:
+    dest: "{{ yadifa_masters_dir }}/{{ item.file }}"
+    src: "{{ item.file }}"
+  loop: "{{ yadifa_zones }}"
+
+- name: yadifa service started
+  service:
+    name: yadifa
+    state: started
+    enabled: yes
