@@ -41,3 +41,11 @@
     name: yadifa
     state: started
     enabled: yes
+
+- name: bind9utils package installed
+  apt:
+    name: bind9utils
+
+- name: display DS records
+  shell: "dig dnskey {{ item.domain }} @{{ yadifa_cli_server }} | dnssec-dsfromkey -f - {{ item.domain }}"
+  loop: "{{ yadifa_zones }}"
