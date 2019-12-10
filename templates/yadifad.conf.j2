@@ -243,7 +243,7 @@
 
   domain                  {{ z.domain }}
 
-  file                    {{ z.file }}
+  file                    {{ z.type }}s/{{ z.file | basename }}
 
 {% if z.dnssec_policy is defined %}
   dnssec-policy		        "{{ z.dnssec_policy }}"
