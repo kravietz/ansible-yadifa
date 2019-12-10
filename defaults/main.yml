@@ -7,6 +7,9 @@ yadifa_log_queries: no
 yadifa_daemon: no
 yadifa_statistics: yes
 
+# Show DS records for all domains at the end of play run
+yadifa_show_ds: no
+
 yadifa_data_dir: /var/lib/yadifa
 yadifa_masters_dir: "{{ yadifa_data_dir }}/masters"
 

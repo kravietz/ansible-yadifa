@@ -46,6 +46,12 @@
   apt:
     name: bind9utils
 
-- name: display DS records
+- name: obtain DS records
   shell: "dig dnskey {{ item.domain }} @{{ yadifa_cli_server }} | dnssec-dsfromkey -f - {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
+  register: ds
+
+- name: display DS records
+  debug:
+    var=ds
+  when: yadifa_show_ds
