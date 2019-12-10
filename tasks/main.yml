@@ -54,5 +54,5 @@
   register: ds
 
 - name: display DS records
-  debug: var=ds.stdout_lines
+  debug: var=ds
   when: yadifa_show_ds
