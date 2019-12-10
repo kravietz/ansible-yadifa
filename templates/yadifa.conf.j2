@@ -1,5 +1,7 @@
 # {{ ansible_managed }}
 
+# Configuration file for yadifa *client* command-line utility
+
 {% if yadifa_global_allow_control != "none" %}
 <yadifa>
 	server {{ yadifa_cli_server }}
