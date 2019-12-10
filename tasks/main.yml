@@ -36,6 +36,13 @@
   command: "yadifa -s {{ yadifa_cli_server }} unfreeze {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
 
+- name: yadifad AppArmor profile
+  copy:
+    src: files/apparmor/usr.sbin.yadifad
+    dest: /etc/apparmor.d/usr.sbin.yadifad
+  notify:
+  - yadifad apparmor
+
 - name: yadifa service started
   service:
     name: yadifa

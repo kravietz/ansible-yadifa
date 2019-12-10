@@ -1,0 +1,27 @@
+# Last Modified: Tue Dec 10 23:40:13 2019
+#include <tunables/global>
+
+/usr/sbin/yadifad flags=(complain) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/openssl>
+
+  network inet6 dgram,
+  network inet6 stream,
+  network inet dgram,
+  network inet stream,
+
+  capability chown,
+  capability dac_override,
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+
+  /etc/yadifa/* r,
+  /usr/sbin/yadifad mr,
+  /var/log/yadifa/* rw,
+  owner /run/yadifa/* rw,
+  owner /var/lib/yadifa/* rw,
+  owner /var/lib/yadifa/** rw,
+
+}

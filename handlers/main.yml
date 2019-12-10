@@ -5,3 +5,6 @@
 - name: yadifa reload zones
   command: "yadifa -s {{ yadifa_cli_server }} reload {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
+
+- name: yadifad apparmor
+  command: apparmor_parser -r -W /etc/apparmor.d/usr.sbin.yadifad
