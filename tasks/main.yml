@@ -16,10 +16,24 @@
     src: templates/yadifa.conf.j2
   when: yadifa_global_allow_control != "none"
 
+- name: sync zone journals
+  command: "yadifa -s {{ yadifa_cli_server }} sync {{ item.domain }} clean"
+  loop: "{{ yadifa_zones }}"
+
+- name: freeze zones prior to possible zone file updates
+  command: "yadifa -s {{ yadifa_cli_server }} freeze {{ item.domain }}"
+  loop: "{{ yadifa_zones }}"
+
 - name: zone files
   copy:
     src: "{{ item.file }}"
     dest: "{{ yadifa_masters_dir }}/{{ item.file | basename }}"
+  loop: "{{ yadifa_zones }}"
+  notify:
+  - reload zones
+
+- name: unfreeze zones
+  command: "yadifa -s {{ yadifa_cli_server }} unfreeze {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
 
 - name: yadifa service started

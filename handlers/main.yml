@@ -3,3 +3,7 @@
   service:
     name: yadifa
     state: restarted
+
+- name: reload zones
+  command: "yadifa -s {{ yadifa_cli_server }} reload{{ item.domain }}"
+  loop: "{{ yadifa_zones }}"
