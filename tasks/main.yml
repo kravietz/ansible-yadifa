@@ -42,9 +42,11 @@
     state: started
     enabled: yes
 
+  # required for dnssec-dsfromkey
 - name: bind9utils package installed
   apt:
     name: bind9utils
+  when: yadifa_show_ds
 
 - name: obtain DS records
   shell: "dig dnskey {{ item.domain }} @{{ yadifa_cli_server }} | dnssec-dsfromkey -f - {{ item.domain }}"
@@ -52,6 +54,5 @@
   register: ds
 
 - name: display DS records
-  debug:
-    var=ds
+  debug: var=ds.stdout_lines
   when: yadifa_show_ds
