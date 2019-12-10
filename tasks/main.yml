@@ -3,18 +3,18 @@
   apt:
     name: yadifa
 
-- name: yadifad server configuration
-  template:
-    dest: /etc/yadifa/yadifad.conf
-    src: templates/yadifad.conf.j2
-  notify:
-  - restart yadifa
-
 - name: yadifa client configuration
   template:
     dest: /etc/yadifa.conf
     src: templates/yadifa.conf.j2
   when: yadifa_global_allow_control != "none"
+
+- name: yadifad server configuration
+  template:
+    dest: /etc/yadifa/yadifad.conf
+    src: templates/yadifad.conf.j2
+  notify:
+  - yadifa cfgreload
 
 - name: sync zone journals
   command: "yadifa -s {{ yadifa_cli_server }} sync {{ item.domain }} clean"
@@ -30,7 +30,7 @@
     dest: "{{ yadifa_masters_dir }}/{{ item.file | basename }}"
   loop: "{{ yadifa_zones }}"
   notify:
-  - reload zones
+  - yadifa reload zones
 
 - name: unfreeze zones
   command: "yadifa -s {{ yadifa_cli_server }} unfreeze {{ item.domain }}"
