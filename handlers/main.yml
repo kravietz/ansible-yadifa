@@ -1,2 +1,5 @@
 ---
-# handlers file for ansible-yadifa
+- name: restart yadifa
+  service:
+    name: yadifa
+    state: restarted

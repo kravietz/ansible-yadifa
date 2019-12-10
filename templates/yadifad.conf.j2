@@ -2,6 +2,8 @@
 # {{ ansible_managed }}
 #
 
+# Reference: https://cdn.yadifa.eu/sites/default/files/YRM239.pdf
+
 <main>
   # Detach from the console
   {% if ansible_service_mgr == "systemd" %}
@@ -57,7 +59,7 @@
   port                        53
 
   # The interfaces to listen to.
-  listen                      {% for i in yadifa_listen %}{{ i }}{% if not loop.last %}; {% endif %}{% endfor %}
+  listen                      {% for i in yadifa_listen %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}
 
   # This will go into syslogd status
   log-from-start              on
@@ -96,9 +98,13 @@
   allow-control               {{ yadifa_global_allow_control }}
 </main>
 
+######################################################
+
 <nsid>
   ascii "{{ yadifa_nsid }}"
 </nsid>
+
+######################################################
 
 {% if yadifa_global_allow_control != "none" %}
 <control>
@@ -106,7 +112,7 @@
 </control>
 {% endif %}
 
-# If YADIFA has been compiled with the Response Rate Limiter (default)
+######################################################
 
 <rrl>
   # enable the RRL
@@ -142,6 +148,8 @@
   # the list of IP/networks (Access Control List) not impacted by the RRL
   exempted none
 </rrl>
+
+######################################################
 
 #
 # Logging output channels configurations
@@ -192,6 +200,8 @@
 {% endif %}
 </loggers>
 
+######################################################
+
 #
 # TSIG Key configuration for controller access
 #
@@ -204,6 +214,8 @@
 </key>
 
 {% endfor %}
+
+######################################################
 
 #
 # Access Control List definitions
@@ -218,6 +230,9 @@
 
 {% endfor %}
 </acl>
+
+######################################################
+
 
 #
 # Master domain zone config
@@ -243,6 +258,8 @@
 </zone>
 {% endfor %}
 
+######################################################
+
 #
 # Policies
 #
@@ -262,6 +279,30 @@
 </dnssec-policy>
 
 {% endfor %}
+
+######################################################
+
+{% if yadifa_nsec3_salt is defined %}
+<denial>
+    type          NSEC3
+    id            "nsec3-fixed"
+    salt          "{{ nsec3_salt }}"
+    iterations    {{ yadifa_nsec3_salt_iter }}
+    optout        {% if yadifa_nsec3_optout %}on{% else %}off{% endif %}
+
+</denial>
+{% else %}
+<denial>
+    type          NSEC3
+    id            "nsec3-random"
+    salt-length   {{ yadifa_nsec3_salt_len }}
+    iterations    {{ yadifa_nsec3_salt_iter }}
+    optout        {% if yadifa_nsec3_optout %}on{% else %}off{% endif %}
+
+</denial>
+{% endif %}
+
+######################################################
 
 <key-suite>
     # name of the key-suite
@@ -332,28 +373,6 @@
     algorithm           RSASHA256
     size                2048
 </key-template>
-
-######################################################
-
-<denial>
-    type NSEC3
-    id            "nsec3-random"
-    salt-length   32
-    iterations    10
-    # can be 0 or 1, true or false, and on or off
-    optout        off
-</denial>
-
-{% if yadifa_nsec3_salt is defined %}
-<denial>
-    type NSEC3
-    id            "nsec3-fixed"
-    salt          "{{ nsec3_salt }}"      # if nsec3-resalting is off
-    iterations    5           # the number of additional times the hash function has been performe
-    # can be 0 or 1, true or false, and on or off
-    optout        off
-</denial>
-{% endif %}
 
 ######################################################
 

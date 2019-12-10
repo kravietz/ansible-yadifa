@@ -1,4 +1,6 @@
 ---
+# Reference: https://cdn.yadifa.eu/sites/default/files/YRM239.pdf
+
 yadifa_hostname: "{{ ansible_hostname }}"
 yadifa_nsid: "{{ ansible_hostname }}"
 yadifa_log_queries: no
@@ -63,6 +65,9 @@ yadifa_global_allow_transfer: none
 yadifa_global_allow_notify: none
 
 # yadifa_nsec3_salt: BA5EBA11
+yadifa_nsec3_optout: yes
+yadifa_nsec3_salt_len: 32
+yadifa_nsec3_salt_iter: 10
 
 # These must match `yadifa_keys` entry used in `yadifa_acls` for controller
 # yadifa_cli_server: "::1"
