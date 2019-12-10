@@ -16,8 +16,8 @@
 
 - name: zone files
   copy:
-    dest: "{{ yadifa_masters_dir }}/{{ item.file }}"
     src: "{{ item.file }}"
+    dest: "{{ yadifa_masters_dir }}/{{ item.file | basename }}"
   loop: "{{ yadifa_zones }}"
 
 - name: yadifa service started
