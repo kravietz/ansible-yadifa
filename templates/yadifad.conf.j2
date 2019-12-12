@@ -308,7 +308,7 @@
 <key-suite>
     id                      "{{ ks.id }}"
     key-roll                "{{ ks.roll }}"
-{% if ks.template %}
+{% if ks.template is defined %}
     key-template            "{{ ks.template }}"
 {% endif %}
 </key-suite>
@@ -322,63 +322,10 @@
     id                  "{{ kt.id }}"
     algorithm           "{{ kt.algorithm }}"
     size                {{ kt.size }}
-    ksk                 {% if kt.ksk %}on{% else %}off{% endif %}
+    ksk                 {% if kt.ksk is defined and kt.ksk %}on{% else %}off{% endif %}
 </key-template>
 
 {% endif %}
-
-
-<key-template>
-    id                  "zsk-rsa-sha512-1024"
-    algorithm           RSASHA512
-    size                1024
-</key-template>
-
-<key-template>
-    id                  "zsk-rsa-sha512-2048"
-    algorithm           RSASHA512
-    size                2048
-</key-template>
-
-<key-template>
-    id                  "zsk-rsa-sha256-1024"
-    algorithm           RSASHA256
-    size                1024
-</key-template>
-
-<key-template>
-    id                  "zsk-rsa-sha256-2048"
-    algorithm           RSASHA256
-    size                2048
-</key-template>
-
-<key-template>
-    id                  "ksk-rsa-sha512-1024"
-    ksk                 1
-    algorithm           RSASHA512
-    size                1024
-</key-template>
-
-<key-template>
-    id                  "ksk-rsa-sha512-2048"
-    ksk                 1
-    algorithm           RSASHA512
-    size                2048
-</key-template>
-
-<key-template>
-    id                  "ksk-rsa-sha256-1024"
-    ksk                 1
-    algorithm           RSASHA256
-    size                1024
-</key-template>
-
-<key-template>
-    id                  "ksk-rsa-sha256-2048"
-    ksk                 1
-    algorithm           RSASHA256
-    size                2048
-</key-template>
 
 ######################################################
 
