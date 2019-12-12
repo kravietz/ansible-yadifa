@@ -24,10 +24,10 @@
   pidfile                     "/run/yadifa/yadifad.pid"
 
   # The path where all zone files will be written
-  datapath                    "/var/lib/yadifa"
+  datapath                    "{{ yadifa_data_dir }}"
 
   # The path where the DNSSEC keys are found
-  keyspath                    "/var/lib/yadifa/keys"
+  keyspath                    "{{ yadifa_keys_dir }}"
 
   # The path where the transfer and journaling files will be written (AXFR & IXFR)
   xfrpath                     "/var/lib/yadifa/xfr"
@@ -304,23 +304,29 @@
 
 ######################################################
 
+{% for ks in yadifa_dnssec_keysuites %}
 <key-suite>
-    # name of the key-suite
-    id                      "zsk-1024"
-    key-template            "zsk-rsa-sha256-1024"
-    # optional, without it, the keys found in the storage are used
-    key-roll                "monthly-diary"
+    id                      "{{ ks.id }}"
+    key-roll                "{{ ks.roll }}"
+{% if ks.template %}
+    key-template            "{{ ks.template }}"
+{% endif %}
 </key-suite>
 
-<key-suite>
-    # name of the key-suite
-    id                      "ksk-2048"
-    key-template            "ksk-rsa-sha256-2048"
-    # optional, without it, the keys found in the storage are used
-    key-roll                "yearly-diary"
-</key-suite>
+{% endfor %}
 
 ######################################################
+
+{% for kt in }
+<key-template>
+    id                  "{{ kt.id }}"
+    algorithm           "{{ kt.algorithm }}"
+    size                {{ kt.size }}
+    ksk                 {% if kt.ksk %}on{% else %}off{% endif %}
+</key-template>
+
+{% endif %}
+
 
 <key-template>
     id                  "zsk-rsa-sha512-1024"

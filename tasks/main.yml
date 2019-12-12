@@ -30,6 +30,15 @@
   command: "yadifa -s {{ yadifa_cli_server }} freeze {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
 
+- name: key files
+  template:
+    src: "{{ item }}"
+    dest: "{{ yadifa_keys_dir }}/ {{ item | basename }}"
+    owner: root
+    group: yadifa
+    mode: 0640
+  loop: "{{ yadifa_dnssec_keys }}"
+
 - name: zone files
   copy:
     src: "{{ item.file }}"
