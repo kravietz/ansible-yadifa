@@ -33,7 +33,7 @@
 - name: key files
   template:
     src: "{{ item }}"
-    dest: "{{ yadifa_keys_dir }}/ {{ item | basename }}"
+    dest: "{{ yadifa_keys_dir }}/{{ item | basename }}"
     owner: root
     group: yadifa
     mode: 0640
