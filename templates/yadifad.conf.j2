@@ -5,7 +5,7 @@
 # Reference: https://cdn.yadifa.eu/sites/default/files/YRM239.pdf
 
 <main>
-  # Detach from the console
+
   {% if ansible_service_mgr == "systemd" %}
   daemon                      off
   {% elif yadifa_daemon is defined %}
@@ -15,84 +15,56 @@
   {% endif %}
 
   # Jail the application
-  chroot                      off
+  chroot                      {% if yadifa_chroot %}on{% else %}off{% endif %}
 
-  # The path where all the log files will be written
   logpath                     "/var/log/yadifa"
-
-  # The location of the pid file
   pidfile                     "/run/yadifa/yadifad.pid"
-
-  # The path where all zone files will be written
   datapath                    "{{ yadifa_data_dir }}"
-
-  # The path where the DNSSEC keys are found
   keyspath                    "{{ yadifa_keys_dir }}"
-
-  # The path where the transfer and journaling files will be written (AXFR & IXFR)
   xfrpath                     "/var/lib/yadifa/xfr"
-
-  # A string returned by a query of hostname. CH TXT (note if you leave
-  # this out, the real hostname will be given back)
-  hostname                  "{{ yadifa_hostname }}"
-
+  hostname                    "{{ yadifa_hostname }}"
   # An ID returned by a query to id.server. CH TXT
   # serverid                   "yadifad-01"
-
   # The version returned by a query to version.yadifa. CH TXT
   # version                   "2.2.0"
-
-  # Set the maximum UDP packet size. Cannot be less than 512. Cannot be
-  # more than 65535.  Typical choice is 4096.
-  edns0-max-size              4096
+  edns0-max-size              {{ yadifa_edns0_max_size }}
 
   # The maximum number of parallel TCP queries.
   max-tcp-queries             100
-
   # The user id to use (an integer can be used)
   uid                         yadifa
-
   # The group id to use (an integer can be used)
   gid                         yadifa
-
   # The DNS port.  Any DNS query will be made using that port unless a specific value is used.
   port                        53
-
   # The interfaces to listen to.
   listen                      {% for i in yadifa_listen %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}
-
-  # This will go into syslogd status
-  log-from-start              on
 
   # Enable the collection and logging of statistics
   statistics                  {% if yadifa_statistics %}on{% else %}off{% endif %}
 
+  # This will go into syslogd status
+  log-from-start              on
+
   # Choose the query log format (0 for none, 1 for YADIFA, 2 for BIND compatible, 3 for YADIFA and BIND)
   queries-log-type            1
-
   # Drop queries with erroneous content
   answer-formerr-packets      on
-
   # Maximum number of records in an AXFR packet.  Set to 1 for compatibility
   # with very old name servers
   # axfr-maxrecordbypacket    0
-
   # Global Access Control List rules.
   #
   # Rules can be defined on network ranges, TSIG signatures, and ACL rules
 
   # simple queries:
   allow-query                 {{ yadifa_global_allow_query }}
-
   # dynamic update of a zone
   allow-update                {{ yadifa_global_allow_update }}
-
   # transfer of a zone (AXFR or IXFR)
   allow-transfer              {{ yadifa_global_allow_transfer }}
-
   # notify of a change in the master
   allow-notify                {{ yadifa_global_allow_notify }}
-
   # If YADIFA has the controller enabled, allow control only for these
   # clients (none by default)
   allow-control               {{ yadifa_global_allow_control }}
@@ -101,14 +73,14 @@
 ######################################################
 
 <nsid>
-  ascii "{{ yadifa_nsid }}"
+  ascii                       "{{ yadifa_nsid }}"
 </nsid>
 
 ######################################################
 
 {% if yadifa_global_allow_control != "none" %}
 <control>
-  enabled true
+  enabled                     true
 </control>
 {% endif %}
 
@@ -117,34 +89,24 @@
 <rrl>
   # enable the RRL
   enabled true
-
   # don't actually limit the response rate, only log what the filter would do
   log_only false
-
   # how many responses per second are allowed for a (masked with the prefix) client
   responses_per_second 5
-
   # how many errors per second are allowed for a (masked with the prefix) client
   errors_per_second 5
-
   # window of time in which the rates are measured, expressed in seconds
   window 15
-
   # every "slip" dropped answers, a truncated answer may randomly be given so the client can ask again using TCP
   slip 2
-
   # the minimum size of the table storing (masked with the prefix) clients
   min_table_size 1024
-
   # the maximum size of the table storing (masked with the prefix) clients
   max_table_size 16384
-
   # IPv4 clients are masked with this prefix
   ipv4_prefix_length 24
-
   # IPv6 clients are masked with this prefix
   ipv6_prefix_length 56
-
   # the list of IP/networks (Access Control List) not impacted by the RRL
   exempted none
 </rrl>
@@ -198,6 +160,7 @@
 {% if yadifa_log_queries %}
   queries         *                                   queries
 {% endif %}
+
 </loggers>
 
 ######################################################
@@ -208,9 +171,9 @@
 
 {% for key in yadifa_keys %}
 <key>
-  name {{ key.name }}
-  algorithm {{ key.algorithm }}
-  secret {{ key.secret }}
+  name            {{ key.name }}
+  algorithm       {{ key.algorithm }}
+  secret          "{{ key.secret }}"
 </key>
 
 {% endfor %}
@@ -233,18 +196,15 @@
 
 ######################################################
 
-
 #
 # Master domain zone config
 #
+
 {% for z in yadifa_zones %}
 <zone>
   type                    {{ z.type }}
-
   domain                  {{ z.domain }}
-
   file                    {{ z.type }}s/{{ z.file | basename }}
-
 {% if z.dnssec_policy is defined %}
   dnssec-policy		        "{{ z.dnssec_policy }}"
 {% endif %}
@@ -256,22 +216,20 @@
   allow-update-forwarding {% if z.allow_update_fw is defined %}{{ z.allow_transfer }}{% else %}none{% endif %}
 
 </zone>
+
 {% endfor %}
 
 ######################################################
 
 #
-# Policies
+# DNSSEC policies
 #
 
 {% for policy in yadifa_dnssec_policies %}
 <dnssec-policy>
   id                      "{{ policy.id }}"
-
   description             "{{ policy.description }}"
-
   denial                  "{{ policy.denial }}"
-
 {% for key_suite in policy.key_suites %}
   key-suite               "{{ key_suite }}"
 {% endfor %}
@@ -285,26 +243,18 @@
 {% if yadifa_nsec3_salt is defined %}
 <denial>
     type          NSEC3
-
     id            "nsec3-fixed"
-
     salt          "{{ nsec3_salt }}"
-
     iterations    {{ yadifa_nsec3_salt_iter }}
-
     optout        {% if yadifa_nsec3_optout %}on{% else %}off{% endif %}
 
 </denial>
 {% else %}
 <denial>
     type          NSEC3
-
     id            "nsec3-random"
-
     salt-length   {{ yadifa_nsec3_salt_len }}
-
     iterations    {{ yadifa_nsec3_salt_iter }}
-
     optout        {% if yadifa_nsec3_optout %}on{% else %}off{% endif %}
 
 </denial>
@@ -315,9 +265,7 @@
 {% for ks in yadifa_dnssec_keysuites %}
 <key-suite>
     id                      "{{ ks.id }}"
-
     key-roll                "{{ ks.roll }}"
-
 {% if ks.template is defined %}
     key-template            "{{ ks.template }}"
 
@@ -332,11 +280,8 @@
 {% for kt in yadifa_dnssec_keytemplates %}
 <key-template>
     id                  "{{ kt.id }}"
-
     algorithm           "{{ kt.algorithm }}"
-
     size                {{ kt.size }}
-    
     ksk                 {% if kt.ksk is defined and kt.ksk %}on{% else %}off{% endif %}
 
 </key-template>
