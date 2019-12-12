@@ -83,5 +83,6 @@
   register: ds
 
 - name: display DS records
-  debug: "{% for res in ds.results %}{{ res.stdout_lines }}{% endfor %}"
+  debug:
+    msg: "{% for res in ds.results %}{{ res.stdout_lines }}{% endfor %}"
   when: yadifa_show_ds
