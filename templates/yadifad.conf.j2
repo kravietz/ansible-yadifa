@@ -206,7 +206,7 @@
   domain                  {{ z.domain }}
   file                    {{ z.type }}s/{{ z.file | basename }}
 {% if z.dnssec_policy is defined %}
-  dnssec-policy		        "{{ z.dnssec_policy }}"
+  dnssec-policy           "{{ z.dnssec_policy }}"
 {% endif %}
 
   allow-transfer          {% if z.allow_transfer is defined %}{{ z.allow_transfer }}{% else %}none{% endif %}
