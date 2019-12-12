@@ -47,6 +47,8 @@
   copy:
     src: files/systemd.ini
     dest: /etc/systemd/system/yadifa.service.d/override.conf
+  notify:
+  - systemd daemon reload
 
 - name: yadifa service started
   service:

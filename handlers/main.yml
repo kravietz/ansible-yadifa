@@ -8,3 +8,7 @@
 
 - name: yadifad apparmor
   command: apparmor_parser -r -W /etc/apparmor.d/usr.sbin.yadifad
+
+- name: systemd daemon reload
+  systemd:
+    daemon_reload: yes
