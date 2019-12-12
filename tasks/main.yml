@@ -7,12 +7,18 @@
   template:
     dest: /etc/yadifa.conf
     src: templates/yadifa.conf.j2
+    owner: root
+    group: yadifa
+    mode: 0640
   when: yadifa_global_allow_control != "none"
 
 - name: yadifad server configuration
   template:
     dest: /etc/yadifa/yadifad.conf
     src: templates/yadifad.conf.j2
+    owner: root
+    group: yadifa
+    mode: 0640
   notify:
   - yadifa cfgreload
 
@@ -28,6 +34,9 @@
   copy:
     src: "{{ item.file }}"
     dest: "{{ yadifa_masters_dir }}/{{ item.file | basename }}"
+    owner: root
+    group: yadifa
+    mode: 0640
   loop: "{{ yadifa_zones }}"
   notify:
   - yadifa reload zones
@@ -40,6 +49,9 @@
   copy:
     src: files/apparmor/usr.sbin.yadifad
     dest: /etc/apparmor.d/usr.sbin.yadifad
+    owner: root
+    group: root
+    mode: 0644
   notify:
   - yadifad apparmor
 
@@ -47,6 +59,9 @@
   template:
     src: templates/systemd.ini
     dest: /etc/systemd/system/yadifa.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644
   notify:
   - systemd daemon reload
 
