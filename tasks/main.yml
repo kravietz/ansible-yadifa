@@ -44,8 +44,8 @@
   - yadifad apparmor
 
 - name: yadifa systemd overrides
-  copy:
-    src: files/systemd.ini
+  template:
+    src: templates/systemd.ini
     dest: /etc/systemd/system/yadifa.service.d/override.conf
   notify:
   - systemd daemon reload
@@ -68,5 +68,5 @@
   register: ds
 
 - name: display DS records
-  debug: var=ds
+  debug: "{% for res in ds.results %}{{ res.stdout_lines }}{% endfor %}"
   when: yadifa_show_ds
