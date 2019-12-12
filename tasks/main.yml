@@ -43,6 +43,11 @@
   notify:
   - yadifad apparmor
 
+- name: yadifa systemd overrides
+  copy:
+    src: files/systemd.ini
+    dest: /etc/systemd/system/yadifa.service.d/override.conf
+
 - name: yadifa service started
   service:
     name: yadifa
