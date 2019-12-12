@@ -285,18 +285,26 @@
 {% if yadifa_nsec3_salt is defined %}
 <denial>
     type          NSEC3
+
     id            "nsec3-fixed"
+
     salt          "{{ nsec3_salt }}"
+
     iterations    {{ yadifa_nsec3_salt_iter }}
+
     optout        {% if yadifa_nsec3_optout %}on{% else %}off{% endif %}
 
 </denial>
 {% else %}
 <denial>
     type          NSEC3
+
     id            "nsec3-random"
+
     salt-length   {{ yadifa_nsec3_salt_len }}
+
     iterations    {{ yadifa_nsec3_salt_iter }}
+
     optout        {% if yadifa_nsec3_optout %}on{% else %}off{% endif %}
 
 </denial>
@@ -307,10 +315,14 @@
 {% for ks in yadifa_dnssec_keysuites %}
 <key-suite>
     id                      "{{ ks.id }}"
+
     key-roll                "{{ ks.roll }}"
+
 {% if ks.template is defined %}
     key-template            "{{ ks.template }}"
+
 {% endif %}
+
 </key-suite>
 
 {% endfor %}
@@ -320,9 +332,13 @@
 {% for kt in yadifa_dnssec_keytemplates %}
 <key-template>
     id                  "{{ kt.id }}"
+
     algorithm           "{{ kt.algorithm }}"
+
     size                {{ kt.size }}
+    
     ksk                 {% if kt.ksk is defined and kt.ksk %}on{% else %}off{% endif %}
+
 </key-template>
 
 {% endfor %}
