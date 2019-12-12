@@ -34,7 +34,7 @@
   template:
     src: "{{ item }}"
     dest: "{{ yadifa_keys_dir }}/{{ item | basename }}"
-    owner: root
+    owner: yadifa
     group: yadifa
     mode: 0640
   loop: "{{ yadifa_dnssec_keys }}"
