@@ -1,7 +1,7 @@
 # Last Modified: Thu Dec 12 23:25:04 2019
 #include <tunables/global>
 
-/usr/sbin/yadifad flags=(complain) {
+/usr/sbin/yadifad {
   #include <abstractions/base>
   #include <abstractions/nameservice>
   #include <abstractions/openssl>
