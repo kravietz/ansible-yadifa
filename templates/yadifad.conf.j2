@@ -261,11 +261,7 @@
 <key-suite>
     id                      "{{ ks.id }}"
     key-roll                "{{ ks.roll }}"
-{% if ks.template is defined %}
     key-template            "{{ ks.template }}"
-
-{% endif %}
-
 </key-suite>
 
 {% endfor %}
