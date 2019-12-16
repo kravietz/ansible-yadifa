@@ -25,10 +25,12 @@
 - name: sync zone journals
   command: "yadifa -s {{ yadifa_cli_server }} sync {{ item.domain }} clean"
   loop: "{{ yadifa_zones }}"
+  ignore_errors: yes # yadifa service may not be yet started
 
 - name: freeze zones prior to possible zone file updates
   command: "yadifa -s {{ yadifa_cli_server }} freeze {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
+  ignore_errors: yes
 
 - name: key files
   template:
@@ -43,7 +45,7 @@
   copy:
     src: "{{ item.file }}"
     dest: "{{ yadifa_masters_dir }}/{{ item.file | basename }}"
-    owner: root
+    owner: yadifa
     group: yadifa
     mode: 0640
   loop: "{{ yadifa_zones }}"
@@ -53,6 +55,7 @@
 - name: unfreeze zones
   command: "yadifa -s {{ yadifa_cli_server }} unfreeze {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
+  ignore_errors: yes
 
 - name: yadifad AppArmor profile
   copy:
@@ -90,6 +93,7 @@
   shell: "dig dnskey {{ item.domain }} @{{ yadifa_cli_server }} | dnssec-dsfromkey -f - {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
   register: ds
+  ignore_errors: yes
 
 - name: display DS records
   debug:
