@@ -150,16 +150,11 @@
 # In production, use EMERG,ALERT,CRIT,ERR,WARNING,NOTICE,INFO instead of *
 
 <loggers>
-# bundle          debuglevel                          channels
-  database        EMERG,ALERT,CRIT,ERR,WARNING,NOTICE database,all
-  dnssec          EMERG,ALERT,CRIT,ERR,WARNING,NOTICE dnssec,all
-  server          EMERG,ALERT,CRIT,ERR,WARNING,NOTICE server,all
-  stats           *                                   statistics
-  system          EMERG,ALERT,CRIT,ERR,WARNING,NOTICE system,all
-  zone            EMERG,ALERT,CRIT,ERR,WARNING,NOTICE zone,all
-{% if yadifa_log_queries %}
-  queries         *                                   queries
-{% endif %}
+# bundle     debuglevel                          channels
+
+{% for k,v in yadifa_loggers.items() %}
+  {{ k }}    {{ v }} {{ k }}
+{% endfor %}
 
 </loggers>
 
