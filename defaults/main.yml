@@ -80,9 +80,6 @@ yadifa_dnssec_policies:
 
 yadifa_dnssec_keysuites:
 - id: zsk-1024
-  # (optional) if no keys for a zone are found in `yadifa_keys_dir`,
-  # Yadifa will generate them according to the specified template
-  # if `template` is not set, it will fail
   template: zsk-rsa-sha256-1024
   roll: monthly-diary
 - id: ksk-2048
