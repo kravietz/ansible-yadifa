@@ -22,12 +22,12 @@
   notify:
   - yadifa cfgreload
 
-- name: sync zone journals
+- name: sync zone journals # noqa 301
   command: "yadifa -s {{ yadifa_cli_server }} sync {{ item.domain }} clean"
   loop: "{{ yadifa_zones }}"
   ignore_errors: yes # yadifa service may not be yet started
 
-- name: freeze zones prior to possible zone file updates
+- name: freeze zones prior to possible zone file updates # noqa 301
   command: "yadifa -s {{ yadifa_cli_server }} freeze {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
   ignore_errors: yes
@@ -52,7 +52,7 @@
   notify:
   - yadifa reload zones
 
-- name: unfreeze zones
+- name: unfreeze zones # noqa 301
   command: "yadifa -s {{ yadifa_cli_server }} unfreeze {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
   ignore_errors: yes
@@ -67,7 +67,7 @@
   notify:
   - yadifad apparmor
 
-- name: yadifa systemd overrides
+- name: yadifa systemd service override
   template:
     src: templates/systemd.ini
     dest: /etc/systemd/system/yadifa.service.d/override.conf
@@ -89,7 +89,7 @@
     name: bind9utils
   when: yadifa_show_ds
 
-- name: obtain DS records
+- name: obtain DS records # noqa 301
   shell: "dig dnskey {{ item.domain }} @{{ yadifa_cli_server }} | dnssec-dsfromkey -f - {{ item.domain }}"
   loop: "{{ yadifa_zones }}"
   register: ds
