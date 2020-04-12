@@ -67,7 +67,14 @@
   notify:
   - yadifad apparmor
 
-- name: yadifa systemd service override
+- name: yadifa systemd override directory
+  file:
+    dest: /etc/systemd/system/yadifa.service.d
+    owner: root
+    group: root
+    mode: 0755
+
+- name: yadifa systemd override service
   template:
     src: templates/systemd.ini
     dest: /etc/systemd/system/yadifa.service.d/override.conf
