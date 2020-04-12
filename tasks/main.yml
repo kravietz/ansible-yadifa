@@ -72,6 +72,7 @@
     dest: /etc/systemd/system/yadifa.service.d
     owner: root
     group: root
+    recurse: yes
     mode: 0755
 
 - name: yadifa systemd override service
